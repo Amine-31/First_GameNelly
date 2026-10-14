@@ -2,19 +2,20 @@ extends Node
 
 const MAX_HEARTS = 3
 const HEART_TEXTURE = preload("res://assets/sprites/Heart.png")
+const FONT = preload("res://assets/fonts/PixelOperator8.ttf")
+
 @onready var menu_button: Button = $"../HUD/GameOverPanel/VBoxContainer/MenuButton"
 @onready var timer_label: Label = $"../HUD/TimerLabel"
 @onready var scor_label: Label = $"../HUD/CoinsBar/SccorLabel"
 @onready var game_over_panel: Control = $"../HUD/GameOverPanel"
 @onready var retry_button: Button = $"../HUD/GameOverPanel/VBoxContainer/RetryButton"
 @onready var hearts_bar: HBoxContainer = $"../HUD/HeartsBar"
-@onready var spawn_point: Marker2D = $"../Level_1/SpawnPoint"
-@export var level_id := "level_1"   # كل مرحلة عندها id مختلف
-const FONT = preload("res://assets/fonts/PixelOperator8.ttf")
+@onready var level_container: Node2D = $"../LevelContainer"
 
-@export var three_star_time := 90.0   # 1:30
-@export var two_star_time := 120.0    # 2:00
-@export_file("*.tscn") var next_level := ""
+var level_id := ""
+var three_star_time := 90.0
+var two_star_time := 120.0
+var spawn_point: Marker2D
 
 var dying := false
 var scor = 0
@@ -25,9 +26,19 @@ var total_coins := 0
 var time := 0.0
 var running := false
 var level_done := false
+var pause_button: Button
+var pause_panel: ColorRect
 
 func _ready():
+	var data = Levels.LEVELS[Levels.current]
+	level_id = data["id"]
+	three_star_time = data["three"]
+	two_star_time = data["two"]
+	var level = load(data["scene"]).instantiate()
+	level_container.add_child(level)
+	spawn_point = level.get_node("SpawnPoint")
 	$"../Player2".global_position = spawn_point.global_position
+
 	retry_button.pressed.connect(_on_retry_pressed)
 	menu_button.pressed.connect(_on_menu_pressed)
 	game_over_panel.visible = false
@@ -36,11 +47,14 @@ func _ready():
 	print("Total coins: ", total_coins)
 	_update_label()
 	_update_hearts()
-	
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_build_pause_menu()
+
 func _fmt(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+
 func _process(delta: float) -> void:
-	if level_done:
+	if level_done or get_tree().paused:
 		return
 	if not running:
 		var moved = Input.get_axis("L_move", "R_move") != 0
@@ -50,17 +64,18 @@ func _process(delta: float) -> void:
 	time += delta / maxf(Engine.time_scale, 0.01)
 	_update_timer()
 	
+
 func on_slime_killed(bonus_time: float):
 	time = maxf(0.0, time - bonus_time)
 	_update_timer()
-	
+
 func _update_timer():
-	timer_label.text = "%d:%02d" % [int(time) / 60, int(time) % 60]
-	
+	timer_label.text = _fmt(time)
+
 func _on_menu_pressed():
 	get_tree().paused = false
 	Engine.time_scale = 1
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/level_select.tscn")
 
 func _update_label():
 	scor_label.text = "%d/%d" % [scor, total_coins]
@@ -102,11 +117,12 @@ func _show_complete_panel(stars: int, is_new_best: bool, previous_best: float):
 	panel.add_child(box)
 
 	box.add_child(_label("LEVEL COMPLETE", 48, Color(1, 0.8, 0.2)))
-	box.add_child(_label("TIME  %d:%02d" % [int(time) / 60, int(time) % 60], 28))
+	box.add_child(_label("TIME  " + _fmt(time), 28))
 	if is_new_best:
 		box.add_child(_label("NEW BEST!", 24, Color(0.4, 1, 0.4)))
 	else:
 		box.add_child(_label("BEST  " + _fmt(previous_best), 20, Color(0.8, 0.8, 0.8)))
+
 	var row = HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 14)
@@ -120,13 +136,14 @@ func _show_complete_panel(stars: int, is_new_best: bool, previous_best: float):
 		star.create_tween().tween_property(star, "scale", Vector2.ONE, 0.25).set_delay(0.3 * (i + 1))
 
 	box.add_child(_button("RETRY", _on_retry_pressed))
-	if next_level != "":
+	if Levels.current + 1 < Levels.LEVELS.size():
 		box.add_child(_button("NEXT LEVEL", _on_next_pressed))
 	box.add_child(_button("MENU", _on_menu_pressed))
 
 func _on_next_pressed():
 	get_tree().paused = false
-	get_tree().change_scene_to_file(next_level)
+	Levels.current += 1
+	get_tree().reload_current_scene()
 
 func _label(text: String, font_size: int, color := Color.WHITE) -> Label:
 	var l = Label.new()
@@ -177,16 +194,19 @@ func add_heart() -> bool:
 	hearts += 1
 	_update_hearts()
 	return true
+
 func kill_player(body: Node2D):
-	if dying or invincible or level_done:		return
+	if dying or invincible or level_done:
+		return
 	dying = true
 	print("You died")
 	Engine.time_scale = 0.5
 	body.get_node("CollisionShape2D").set_deferred("disabled", true)
-	await get_tree().create_timer(1.0, true, false, true).timeout  # كيتجاهل time_scale
+	await get_tree().create_timer(1.0, true, false, true).timeout
 	Engine.time_scale = 1
 	dying = false
 	lose_heart(body)
+
 func lose_heart(body: Node2D):
 	hearts -= 1
 	print("Hearts left: ", hearts)
@@ -213,3 +233,48 @@ func game_over():
 func _on_retry_pressed():
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+func _build_pause_menu():
+	pause_button = _button("II", _toggle_pause)
+	for state in ["normal", "hover", "pressed"]:
+		var s = StyleBoxFlat.new()
+		s.bg_color = Color(0, 0, 0, 0.35) if state != "pressed" else Color(0, 0, 0, 0.6)
+		s.set_border_width_all(0)
+		s.set_corner_radius_all(8)
+		pause_button.add_theme_stylebox_override(state, s)
+	pause_button.custom_minimum_size = Vector2(56, 56)
+	pause_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	pause_button.offset_left = -76
+	pause_button.offset_right = -20
+	pause_button.offset_top = 7
+	pause_button.offset_bottom = 20
+	$"../HUD".add_child(pause_button)
+
+	pause_panel = ColorRect.new()
+	pause_panel.color = Color(0, 0, 0, 0.75)
+	pause_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pause_panel.visible = false
+	$"../HUD".add_child(pause_panel)
+
+	var box = VBoxContainer.new()
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 18)
+	pause_panel.add_child(box)
+
+	box.add_child(_label("PAUSED", 48, Color(1, 0.8, 0.2)))
+	box.add_child(_button("RESUME", _toggle_pause))
+	box.add_child(_button("RESTART", _on_retry_pressed))
+	box.add_child(_button("STAGES", _on_menu_pressed))
+
+func _toggle_pause():
+	if level_done or dying or game_over_panel.visible:
+		return
+	var p = not get_tree().paused
+	get_tree().paused = p
+	pause_panel.visible = p
+	pause_button.visible = not p
+	$"../TouchControls".visible = not p
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_toggle_pause()

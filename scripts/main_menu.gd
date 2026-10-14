@@ -1,7 +1,7 @@
 extends Control
 
 const FONT = preload("res://assets/fonts/PixelOperator8.ttf")
-const GAME_SCENE = "res://scenes/game.tscn"
+const GAME_SCENE = "res://scenes/level_select.tscn"
 const GOLD = Color(1, 0.8, 0.2)
 
 @onready var vbox: VBoxContainer = $VBoxContainer

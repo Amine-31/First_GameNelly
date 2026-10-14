@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://cedfkaqbo8wdh"]
 
-[ext_resource type="FontFile" uid="uid://dm58qjkkxqjox" path="res://assets/fonts/PixelOperator8-Bold.ttf" id="3_x2xxo"]
 [ext_resource type="FontFile" uid="uid://njydc2e50off" path="res://assets/fonts/PixelOperator8.ttf" id="4_2cbcq"]
 [ext_resource type="Texture2D" uid="uid://ckwm7iqr41hap" path="res://assets/sprites/world_tileset.png" id="10_x2fux"]
 [ext_resource type="PackedScene" uid="uid://dtl4aqo0oxlmx" path="res://scenes/platform.tscn" id="11_s7g0b"]
@@ -298,32 +297,33 @@ autoplay = &"UP_movve"
 [node name="Labels" type="Node" parent="World" unique_id=1934417123]
 
 [node name="Label3" type="Label" parent="World/Labels" unique_id=1180107524]
-offset_left = 891.0
-offset_top = -159.0
-offset_right = 997.0
-offset_bottom = -150.0
-theme_override_colors/font_color = Color(0.18039216, 0.21176471, 0.87058824, 1)
-theme_override_fonts/font = ExtResource("3_x2xxo")
-theme_override_font_sizes/font_size = 8
-text = "GREET.."
+offset_left = 95.0
+offset_top = 82.0
+offset_right = 203.0
+offset_bottom = 99.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("4_2cbcq")
+theme_override_font_sizes/font_size = 6
+text = "Stomp on its head to...
+kill it!"
 horizontal_alignment = 1
 uppercase = true
 
 [node name="Label2" type="Label" parent="World/Labels" unique_id=1004692282]
-offset_left = -613.0
-offset_top = -7.0
-offset_right = -507.0
-offset_bottom = 2.0
+offset_left = -186.0
+offset_top = 1.0
+offset_right = -80.0
+offset_bottom = 10.0
 theme_override_fonts/font = ExtResource("4_2cbcq")
 theme_override_font_sizes/font_size = 8
 text = " space To Jump..."
 uppercase = true
 
 [node name="Label" type="Label" parent="World/Labels" unique_id=1074235043]
-offset_left = -633.0
-offset_top = -19.0
-offset_right = -522.0
-offset_bottom = -10.0
+offset_left = -214.0
+offset_top = -14.0
+offset_right = -103.0
+offset_bottom = -5.0
 theme_override_fonts/font = ExtResource("4_2cbcq")
 theme_override_font_sizes/font_size = 8
 text = "Use A/D To move..."

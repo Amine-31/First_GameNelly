@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://c215tmg48ya4v" path="res://assets/sprites/coinc.png" id="1_kvpfn"]
 [ext_resource type="PackedScene" uid="uid://bilv51nvxkuia" path="res://scenes/player0.tscn" id="1_lnu2h"]
 [ext_resource type="FontFile" uid="uid://njydc2e50off" path="res://assets/fonts/PixelOperator8.ttf" id="1_u5sy4"]
-[ext_resource type="PackedScene" uid="uid://cedfkaqbo8wdh" path="res://scenes/level_1.tscn" id="1_vtaks"]
 [ext_resource type="FontFile" uid="uid://dm58qjkkxqjox" path="res://assets/fonts/PixelOperator8-Bold.ttf" id="2_0tnpc"]
 [ext_resource type="Script" uid="uid://bk55tcl6g3lpk" path="res://scripts/touch_controls.gd" id="13_kvuet"]
 [ext_resource type="Texture2D" uid="uid://ccoglsd63540y" path="res://assets/sprites/A.png" id="14_trtic"]
@@ -17,14 +16,14 @@ font_color = Color(0, 0.16078432, 1, 1)
 
 [node name="Game" type="Node2D" unique_id=1387574754]
 
-[node name="Level_1" parent="." unique_id=468712487 instance=ExtResource("1_vtaks")]
+[node name="LevelContainer" type="Node2D" parent="." unique_id=835526835]
 
 [node name="Gamemanager" type="Node" parent="." unique_id=2095506331]
 unique_name_in_owner = true
 script = ExtResource("1_gee14")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=136618169]
-process_mode = 2
+process_mode = 3
 
 [node name="CoinsBar" type="HBoxContainer" parent="HUD" unique_id=965058613]
 custom_minimum_size = Vector2(80, 0)
@@ -99,9 +98,10 @@ theme_override_constants/separation = 8
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -105.0
-offset_top = 20.0
-offset_bottom = 49.0
+offset_left = -181.18
+offset_top = 22.26
+offset_right = -76.178955
+offset_bottom = 57.050003
 grow_horizontal = 0
 theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("2_0tnpc")
