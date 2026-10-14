@@ -8,7 +8,7 @@ const HEART_TEXTURE = preload("res://assets/sprites/Heart.png")
 @onready var game_over_panel: Control = $"../HUD/GameOverPanel"
 @onready var retry_button: Button = $"../HUD/GameOverPanel/VBoxContainer/RetryButton"
 @onready var hearts_bar: HBoxContainer = $"../HUD/HeartsBar"
-@onready var spawn_point: Marker2D = $"../SpawnPoint"
+@onready var spawn_point: Marker2D = $"../Level_1/SpawnPoint"
 @export var level_id := "level_1"   # كل مرحلة عندها id مختلف
 const FONT = preload("res://assets/fonts/PixelOperator8.ttf")
 
@@ -27,6 +27,7 @@ var running := false
 var level_done := false
 
 func _ready():
+	$"../Player2".global_position = spawn_point.global_position
 	retry_button.pressed.connect(_on_retry_pressed)
 	menu_button.pressed.connect(_on_menu_pressed)
 	game_over_panel.visible = false
